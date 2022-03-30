@@ -1,0 +1,88 @@
+#:set file_add_pressed 'add_pressed.jpg'
+#:set file_add_released 'add_released.jpg'
+#:set file_background_animation 'background_animation.zip'
+#:set file_background_transparent 'background_transparent.png'
+#:set file_confirm 'confirm.png'
+#:set file_finish 'finish.png'
+#:set file_font_bold 'Montserrat/Montserrat-Bold.ttf'
+#:set file_font_medium 'Montserrat/Montserrat-Medium.ttf'
+#:set file_font_semi_bold 'Montserrat/Montserrat-SemiBold.ttf'
+#:set file_logo_horizontal 'logo_horizontal.png'
+#:set file_metis 'metis.png'
+#:set file_search_pressed 'search_pressed.jpg'
+#:set file_search_released 'search_released.jpg'
+
+#:set rgba_black (0, 0, 0, 1)
+#:set rgba_blue (28/255, 154/255, 214/255, 1)
+#:set rgba_dark_grey (154/255, 155/255, 156/255, 1)
+#:set rgba_dim_grey (88/255, 89/255, 91/255, 1)
+#:set rgba_green (42/255, 182/255, 115/255, 1)
+#:set rgba_grey (188/255, 190/255, 192/255, 1)
+#:set rgba_light_grey (230/255, 231/255, 232/255, 1)
+#:set rgba_orange (247/255, 149/255, 32/255, 1)
+#:set rgba_red (1, 0, 0, 1)
+#:set rgba_transparent (0, 0, 0, 0)
+#:set rgba_transparent_grey (251/255, 251/255, 251/255, 1)
+#:set rgba_white (1, 1, 1, 1)
+
+<Background@FloatLayout>:
+    size_hint: 1, 1
+    pos_hint: {'x': 0, 'y': 0}
+    canvas.before:
+        Color:
+            rgba: rgba_white
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<FakeArena@Widget>:
+    size_hint: 0.8, 0.8
+    pos_hint: {'x': 0.1, 'y': 0.1}
+    canvas.after:
+        Color:
+            rgba: rgba_black
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+
+<Arena@Widget>:
+    size_hint: 0.79, 0.78
+    size_hint: 0.5, 0.78
+    pos_hint: {'x': 0.105, 'y': 0.11}
+    canvas.after:
+        Color:
+            rgba: rgba_black
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+
+<Car>:
+    angle: 0
+    size_hint: 0.05, 0.05
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: root.angle
+            axis: 0, 0, 1
+            origin: root.center
+        Color:
+            rgba: rgba_black
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<Simulator>:
+    car1: car1
+    arena: arena
+
+    Background:
+        id: background
+
+    FakeArena:
+
+    Arena:
+        id: arena
+
+    Car:
+        id: car1
+        center: self.parent.center
