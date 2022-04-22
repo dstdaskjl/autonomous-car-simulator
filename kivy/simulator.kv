@@ -1,16 +1,10 @@
-#:set file_add_pressed 'add_pressed.jpg'
-#:set file_add_released 'add_released.jpg'
-#:set file_background_animation 'background_animation.zip'
-#:set file_background_transparent 'background_transparent.png'
-#:set file_confirm 'confirm.png'
-#:set file_finish 'finish.png'
+#:set file_arrow_forward 'arrow-forward.png'
+#:set file_arrow_backward 'arrow-backward.png'
+#:set file_arrow_left 'arrow-left.png'
+#:set file_arrow_right 'arrow-right.png'
 #:set file_font_bold 'Montserrat/Montserrat-Bold.ttf'
 #:set file_font_medium 'Montserrat/Montserrat-Medium.ttf'
 #:set file_font_semi_bold 'Montserrat/Montserrat-SemiBold.ttf'
-#:set file_logo_horizontal 'logo_horizontal.png'
-#:set file_metis 'metis.png'
-#:set file_search_pressed 'search_pressed.jpg'
-#:set file_search_released 'search_released.jpg'
 
 #:set rgba_black (0, 0, 0, 1)
 #:set rgba_blue (28/255, 154/255, 214/255, 1)
@@ -42,18 +36,27 @@
         Color:
             rgba: rgba_black
         Line:
-            width: 1
+            width: 2
             rectangle: self.x, self.y, self.width, self.height
 
 <Maze@GridLayout>:
-    rows: 10
-    cols: 10
+    rows: 20
+    cols: 30
+    spacing: 1
     size_hint: 0.8, 0.8
     pos_hint: {'x': 0.1, 'y': 0.1}
 
+    canvas.before:
+        Color:
+            rgba: rgba_black
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
 <Car>:
     angle: 0
-    size_hint: 0.025, 0.025
+    size_hint: 0.1, 0.04
+    arrow: 'forward'
 
     canvas.after:
         PushMatrix
@@ -64,8 +67,36 @@
         Color:
             rgba: rgba_black
         Rectangle:
-            pos: self.x + (self.width / 4), self.y + (self.height / 4)
-            size: self.width / 1.2, self.height / 1.2
+            pos: self.x + (self.width / 4), self.y
+            size: self.width / 2, self.height
+
+        Color:
+            rgba: rgba_black if self.arrow == 'forward' else rgba_transparent
+        Rectangle:
+            pos: self.x - 5, self.y + self.height / 4
+            size: self.width / 6, self.height / 2
+            source: file_arrow_forward
+
+        Color:
+            rgba: rgba_black if self.arrow == 'backward' else rgba_transparent
+        Rectangle:
+            pos: self.x + (self.width * 3 / 4) +  5, self.y + self.height / 4
+            size: self.width / 6, self.height / 2
+            source: file_arrow_backward
+
+        Color:
+            rgba: rgba_black if self.arrow == 'left' else rgba_transparent
+        Rectangle:
+            pos: self.x - 5, self.y
+            size: self.width / 6, self.height / 2
+            source: file_arrow_left
+
+        Color:
+            rgba: rgba_black if self.arrow == 'right' else rgba_transparent
+        Rectangle:
+            pos: self.x - 5, self.y + self.height / 2
+            size: self.width / 6, self.height / 2
+            source: file_arrow_right
 
 <Obstacle>:
     canvas:
@@ -88,6 +119,15 @@
 
     Maze:
         id: maze
+
+    Label:
+        text: '(' + str(round(car.center_x)) + ',' + str(round(car.center_y)) + ')'
+        font_size: 20
+        color: rgba_black
+        size_hint: None, None
+        size: car.size
+        center_x: car.center_x
+        y: car.top + 70
 
     Car:
         id: car

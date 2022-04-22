@@ -17,7 +17,11 @@ class Arena(Widget):
     def bounce(self, car):
         if not car.updating:
             if self.collide(car=car):
-                car.rotate(angle=self.safe_angle(car))
+                car.update_direction()
+                Clock.schedule_once(
+                    callback=lambda *args: car.rotate(angle=self.safe_angle(car)),
+                    timeout=car.duration / 2
+                )
 
     def safe_angle(self, car):
         rhit = not self.collide_point(*car.abs_right())
@@ -40,7 +44,11 @@ class Maze(GridLayout):
     def bounce(self, car):
         if not car.updating:
             if self.collide(car=car):
-                car.rotate(angle=random.randint(*ANGLE_RANGE) * random.choice([-1, 1]))
+                car.update_direction()
+                Clock.schedule_once(
+                    callback=lambda *args: car.rotate(angle=random.randint(*ANGLE_RANGE) * random.choice([-1, 1])),
+                    timeout=car.duration / 2
+                )
 
     def safe_angle(self, car):
         angle = random.randint(*ANGLE_RANGE)
@@ -50,9 +58,9 @@ class Maze(GridLayout):
             if rhit and lhit:
                 return angle * random.choice([-1, 1])
             if rhit:
-                return angle
-            if lhit:
                 return -angle
+            if lhit:
+                return angle
 
     def collide(self, car):
         for obstacle in self.obstacles:
@@ -63,7 +71,7 @@ class Maze(GridLayout):
         return False
 
     def add_obstacles(self):
-        with open('maze.txt') as f:
+        with open('obstacle.txt') as f:
             lines = f.readlines()
 
         arr = list()
@@ -74,10 +82,10 @@ class Maze(GridLayout):
         for line in arr:
             for c in line:
                 o = Obstacle()
-                if c != 'x':
-                    o.color = (1, 1, 1, 1)
-                else:
+                if c == 'x':
                     self.obstacles.append(o)
+                else:
+                    o.color = (1, 1, 1, 1)
                 self.add_widget(o)
 
 
@@ -90,11 +98,10 @@ class Car(Widget):
         super(Car, self).__init__(**kwargs)
         self.updating = False
         self.duration = 0.3
+        self.is_forward = True
 
     def forward(self):
         self.pos = Vector(*self.velocity) + self.pos
-        # print(self.pos)
-        # print()
 
     def backward(self):
         self.pos = -Vector(*self.velocity) + self.pos
@@ -102,10 +109,22 @@ class Car(Widget):
     def rotate(self, angle):
         self.update_flag(val=True)
         self.update_vector(angle=angle)
+        self.update_direction()
+        self.update_arrow(direction='left' if angle > 0 else 'right')
         updated_angle = self.angle + angle
         anim = Animation(angle=updated_angle, duration=self.duration)
         anim.bind(on_complete=lambda *args: self.update_flag(val=False))
-        Clock.schedule_once(callback=lambda *args: anim.start(self), timeout=0)
+        anim.start(widget=self)
+
+    def reset_arrow(self):
+        self.arrow = 'None'
+
+    def update_arrow(self, direction):
+        self.reset_arrow()
+        self.arrow = direction
+
+    def update_direction(self):
+        self.is_forward = self.is_forward != True
 
     def update_vector(self, angle):
         vector = Vector(self.velocity).rotate(angle)
@@ -152,6 +171,7 @@ class Simulator(Screen):
 
     def update(self, dt):
         if not self.car.updating:
-            self.car.forward()
+            self.car.forward() if self.car.is_forward else self.car.backward()
+            self.car.update_arrow(direction='forward') if self.car.is_forward else self.car.update_arrow(direction='backward')
         self.arena.bounce(self.car)
         self.maze.bounce(self.car)
