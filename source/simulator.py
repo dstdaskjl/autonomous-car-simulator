@@ -10,32 +10,33 @@ import random
 import math
 
 
-ANGLE_RANGE = (80, 130)
+ANGLE_RANGE_WIDE = (100, 130)
+ANGLE_RANGE_NARROW = (40, 80)
 
 
 class Arena(Widget):
     def bounce(self, car):
         if not car.updating:
-            if self.collide(car=car):
+            lhit, rhit = self.collide(car=car)
+            if lhit or rhit:
                 car.update_direction()
                 Clock.schedule_once(
-                    callback=lambda *args: car.rotate(angle=self.safe_angle(car)),
-                    timeout=car.duration / 2
+                    callback=lambda *args: car.rotate(angle=self.safe_angle(lhit=lhit, rhit=rhit)),
+                    timeout=car.duration
                 )
 
-    def safe_angle(self, car):
-        rhit = not self.collide_point(*car.abs_right())
-        lhit = not self.collide_point(*car.abs_left())
-        angle = random.randint(*ANGLE_RANGE)
-
+    def safe_angle(self, lhit, rhit):
         if rhit and lhit:
-            return angle * random.choice([-1, 1])
-        return angle if rhit else -angle
+            return random.randint(*ANGLE_RANGE_WIDE) * random.choice([-1, 1])
+        elif rhit:
+            return random.randint(*ANGLE_RANGE_NARROW)
+        else:
+            return -random.randint(*ANGLE_RANGE_NARROW)
 
     def collide(self, car):
-        rhit = not self.collide_point(*car.abs_right())
         lhit = not self.collide_point(*car.abs_left())
-        return True if rhit or lhit else False
+        rhit = not self.collide_point(*car.abs_right())
+        return lhit, rhit
 
 
 class Maze(GridLayout):
@@ -43,32 +44,29 @@ class Maze(GridLayout):
 
     def bounce(self, car):
         if not car.updating:
-            if self.collide(car=car):
+            lhit, rhit = self.collide(car=car)
+            if lhit or rhit:
                 car.update_direction()
                 Clock.schedule_once(
-                    callback=lambda *args: car.rotate(angle=random.randint(*ANGLE_RANGE) * random.choice([-1, 1])),
-                    timeout=car.duration / 2
+                    callback=lambda *args: car.rotate(angle=self.safe_angle(lhit=lhit, rhit=rhit)),
+                    timeout=car.duration
                 )
 
-    def safe_angle(self, car):
-        angle = random.randint(*ANGLE_RANGE)
-        for obstacle in self.obstacles:
-            rhit = obstacle.collide_point(*car.abs_right())
-            lhit = obstacle.collide_point(*car.abs_left())
-            if rhit and lhit:
-                return angle * random.choice([-1, 1])
-            if rhit:
-                return -angle
-            if lhit:
-                return angle
+    def safe_angle(self, lhit, rhit):
+        if rhit and lhit:
+            return random.randint(*ANGLE_RANGE_WIDE) * random.choice([-1, 1])
+        elif rhit:
+            return random.randint(*ANGLE_RANGE_NARROW)
+        else:
+            return -random.randint(*ANGLE_RANGE_NARROW)
 
     def collide(self, car):
         for obstacle in self.obstacles:
             rhit = obstacle.collide_point(*car.abs_right())
             lhit = obstacle.collide_point(*car.abs_left())
             if rhit or lhit:
-                return True
-        return False
+                return lhit, rhit
+        return None, None
 
     def add_obstacles(self):
         with open('obstacle.txt') as f:
