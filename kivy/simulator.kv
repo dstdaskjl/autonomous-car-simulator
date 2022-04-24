@@ -64,12 +64,43 @@
             angle: root.angle
             axis: 0, 0, 1
             origin: root.center
+
+
+        # Wheels
+        Color:
+            rgba: rgba_green
+        Rectangle:
+            pos: self.x + (self.width / 4) + 10, self.y - 2
+            size: self.width / 7, 4
+
+        Color:
+            rgba: rgba_green
+        Rectangle:
+            pos: self.x + (self.width / 2) + 10, self.y - 2
+            size: self.width / 7, 4
+
+        Color:
+            rgba: rgba_green
+        Rectangle:
+            pos: self.x + (self.width / 4) + 10, self.top - 2
+            size: self.width / 7, 4
+
+        Color:
+            rgba: rgba_green
+        Rectangle:
+            pos: self.x + (self.width / 2) + 10, self.top - 2
+            size: self.width / 7, 4
+
+
+        # Car body
         Color:
             rgba: rgba_black
         Rectangle:
-            pos: self.x + (self.width / 4), self.y
-            size: self.width / 2, self.height
+            pos: self.x + (self.width / 4), self.y + 2
+            size: self.width / 2, self.height - 4
 
+
+        # Arrows
         Color:
             rgba: rgba_black if self.arrow == 'forward' else rgba_transparent
         Rectangle:
@@ -121,7 +152,7 @@
         id: maze
 
     Label:
-        text: '(' + str(round(car.center_x)) + ',' + str(round(car.center_y)) + ')'
+        text: '(' + str(round(car.center_x - arena.x)) + ',' + str(round(car.center_y - arena.y)) + ')'
         font_size: 20
         color: rgba_black
         size_hint: None, None
