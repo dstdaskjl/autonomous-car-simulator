@@ -43,7 +43,7 @@ class PostSetting:
 
     def _name(self):
         from kivy.app import App
-        App.title = 'Goodwill - Spectrometer Annotation Tool'
+        App.title = 'Obstacle Avoidance Simulator'
 
     def _path(self):
         from kivy import resources
