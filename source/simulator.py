@@ -12,6 +12,7 @@ import math
 
 ANGLE_RANGE_WIDE = (100, 130)
 ANGLE_RANGE_NARROW = (40, 80)
+DURATION = 0.3
 
 
 class Arena(Widget):
@@ -22,7 +23,7 @@ class Arena(Widget):
                 car.update_direction()
                 Clock.schedule_once(
                     callback=lambda *args: car.rotate(angle=self.safe_angle(lhit=lhit, rhit=rhit)),
-                    timeout=car.duration
+                    timeout=DURATION
                 )
 
     def safe_angle(self, lhit, rhit):
@@ -49,7 +50,7 @@ class Maze(GridLayout):
                 car.update_direction()
                 Clock.schedule_once(
                     callback=lambda *args: car.rotate(angle=self.safe_angle(lhit=lhit, rhit=rhit)),
-                    timeout=car.duration
+                    timeout=DURATION
                 )
 
     def safe_angle(self, lhit, rhit):
@@ -95,7 +96,6 @@ class Car(Widget):
     def __init__(self, **kwargs):
         super(Car, self).__init__(**kwargs)
         self.updating = False
-        self.duration = 0.3
         self.is_forward = True
 
     def forward(self):
@@ -110,7 +110,7 @@ class Car(Widget):
         self.update_direction()
         self.update_arrow(direction='left' if angle > 0 else 'right')
         updated_angle = self.angle + angle
-        anim = Animation(angle=updated_angle, duration=self.duration)
+        anim = Animation(angle=updated_angle, duration=DURATION)
         anim.bind(on_complete=lambda *args: self.update_flag(val=False))
         anim.start(widget=self)
 
@@ -148,24 +148,33 @@ class Car(Widget):
         return nx, ny
 
 
+class Head(Widget):
+    def rotate(self):
+        anim = Animation(angle=40, duration=DURATION * 2) + Animation(angle=-40, duration=DURATION * 2)
+        anim.repeat = True
+        anim.start(widget=self)
+
+
 class Obstacle(Widget):
     color = ListProperty((0.1, 0.2, 0.3, 1))
 
 
 class Simulator(Screen):
-    car = ObjectProperty(None)
     arena = ObjectProperty(None)
     maze = ObjectProperty(None)
+    car = ObjectProperty(None)
+    head = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(Simulator, self).__init__(**kwargs)
-        Clock.schedule_once(callback=lambda *args: self.start(car=self.car, maze=self.maze), timeout=1)
+        Clock.schedule_once(callback=lambda *args: self.start(), timeout=1)
 
-    def start(self, car, maze, vel=(-8, 0)):
-        car.center = self.center
-        car.velocity = vel
-        maze.add_obstacles()
+    def start(self, vel=(-4, 0)):
+        self.car.center = self.center
+        self.car.velocity = vel
+        self.maze.add_obstacles()
         Clock.schedule_interval(callback=self.update, timeout=1/30)
+        self.head.rotate()
 
     def update(self, dt):
         if not self.car.updating:

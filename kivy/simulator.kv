@@ -129,6 +129,28 @@
             size: self.width / 6, self.height / 2
             source: file_arrow_right
 
+<Head>:
+    angle: 0
+    size_hint: 0.006, 0.016
+    canvas:
+        PushMatrix
+        Rotate:
+            angle: root.angle
+            axis: 0, 0, 1
+            origin: root.x + root.width, root.y + (self.height / 2)
+
+        Color:
+            rgba: rgba_white
+        Rectangle:
+            size: self.width / 3, self.height
+            pos: self.pos
+
+        Color:
+            rgba: rgba_white
+        Rectangle:
+            size: self.width, self.height / 6
+            pos: self.x, self.y + (self.height / 2) - (self.height / 12)
+
 <Obstacle>:
     canvas:
         Color:
@@ -138,9 +160,10 @@
             pos: self.pos
 
 <Simulator>:
-    car: car
     arena: arena
     maze: maze
+    car: car
+    head: head
 
     Background:
         id: background
@@ -163,3 +186,8 @@
     Car:
         id: car
         center: root.center
+
+    Head:
+        id: head
+        x: car.x + (car.width / 4) + 10
+        center_y: car.center_y
