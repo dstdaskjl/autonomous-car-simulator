@@ -40,7 +40,7 @@
             rectangle: self.x, self.y, self.width, self.height
 
 <Maze@GridLayout>:
-    rows: 20
+    rows: 21
     cols: 30
     spacing: 1
     size_hint: 0.8, 0.8
@@ -151,6 +151,24 @@
             size: self.width, self.height / 6
             pos: self.x, self.y + (self.height / 2) - (self.height / 12)
 
+<LWing>:
+    size_hint: 0.01, 0.05
+    canvas.after:
+        Color:
+            rgba: rgba_transparent
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<RWing>:
+    size_hint: 0.01, 0.05
+    canvas.after:
+        Color:
+            rgba: rgba_transparent
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
 <Obstacle>:
     canvas:
         Color:
@@ -164,6 +182,8 @@
     maze: maze
     car: car
     head: head
+    lwing: lwing
+    rwing: rwing
 
     Background:
         id: background
@@ -186,6 +206,16 @@
     Car:
         id: car
         center: root.center
+
+    LWing:
+        id: lwing
+        x: car.x + (car.width / 4)
+        top: car.y
+
+    RWing:
+        id: rwing
+        x: car.x + (car.width / 4)
+        y: car.top
 
     Head:
         id: head
