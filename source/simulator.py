@@ -3,16 +3,15 @@ from kivy.uix.screenmanager import Screen
 from kivy.animation import Animation
 from kivy.uix.widget import Widget
 from kivy.uix.gridlayout import GridLayout
-from kivy.graphics import Color, Rectangle
 from kivy.properties import NumericProperty, ListProperty, ReferenceListProperty, ObjectProperty
 from kivy.vector import Vector
 import random
 import math
-import time
 
 
 ANGLE_RANGE_WIDE = (100, 130)
 ANGLE_RANGE_NARROW = (40, 80)
+VELOCITY = 4
 DURATION = 0.3
 
 
@@ -70,23 +69,48 @@ class Maze(GridLayout):
                 return lhit, rhit
         return None, None
 
-    def add_obstacles(self):
+    def add_obstacles(self, maze):
+        for row in maze:
+            for elm in row:
+                obstacle = Obstacle()
+                if elm == 'x':
+                    self.obstacles.append(obstacle)
+                else:
+                    obstacle.color = (1, 1, 1, 1)
+                self.add_widget(obstacle)
+
+    def obstacles_from_file(self):
         with open('obstacle.txt') as f:
             lines = f.readlines()
 
-        arr = list()
+        maze = list()
         for line in lines:
             line = line.replace('\n', '')
-            arr.append(line.split(' '))
+            maze.append(line.split(' '))
 
-        for line in arr:
-            for c in line:
-                o = Obstacle()
-                if c == 'x':
-                    self.obstacles.append(o)
+        return maze
+
+    def generate_obstacles(self, obs_count=3, obs_size=(3, 3), maze_size=(21, 30)):
+        maze = [['p'] * maze_size[1] for _ in range(maze_size[0])]
+        for _ in range(obs_count):
+            while True:
+                row = random.randint(0, maze_size[0] - obs_size[0])
+                col = random.randint(0, maze_size[1] - obs_size[1])
+
+                is_coord_valid = True
+                for i in range(obs_size[0]):
+                    for j in range(obs_size[1]):
+                        if maze[row + i][col + j] == 'x':
+                            is_coord_valid = False
+
+                if not is_coord_valid:
+                    continue
                 else:
-                    o.color = (1, 1, 1, 1)
-                self.add_widget(o)
+                    for i in range(obs_size[0]):
+                        for j in range(obs_size[1]):
+                            maze[row + i][col + j] = 'x'
+                    break
+        return maze
 
 
 class Car(Widget):
@@ -116,6 +140,7 @@ class Car(Widget):
         lml, lmr = self.maze.collide(self.lwing)
         rml, rmr = self.maze.collide(self.rwing)
 
+        # Backup
         if lal or lar or ral or rar or lml or lmr or rml or rmr:
             if ((lal or lar) and (ral or rar)) or ((lml or lmr) and (rml or rmr)):
                 Clock.schedule_once(
@@ -132,6 +157,8 @@ class Car(Widget):
                     callback=lambda *args: self.rotate(angle=abs(angle)),
                     timeout=DURATION * 3
                 )
+
+        # Start rotating
         else:
             self.update_flag(val=True)
             self.update_vector(angle=angle)
@@ -237,7 +264,7 @@ class Simulator(Screen):
         super(Simulator, self).__init__(**kwargs)
         Clock.schedule_once(callback=lambda *args: self.start(), timeout=1)
 
-    def start(self, vel=(-4, 0)):
+    def start(self, vel=(-VELOCITY, 0)):
         self.car.center = self.center
         self.car.velocity = vel
         self.car.arena = self.arena
@@ -247,7 +274,8 @@ class Simulator(Screen):
         self.lwing.car = self.car
         self.rwing.car = self.car
 
-        self.maze.add_obstacles()
+        # self.maze.add_obstacles(self.maze.from_file())
+        self.maze.add_obstacles(self.maze.generate_obstacles())
         Clock.schedule_interval(callback=self.update, timeout=1/30)
         self.head.rotate()
 
