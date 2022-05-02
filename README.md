@@ -4,7 +4,7 @@ The obstacles are randomly generated in the arena. But the number and size of th
 Also, "obstacle.txt" can be used to spawn obstacles at specific locations.
 
 <h1>Installation</h1>
-<code>python3 -m pip install pillow numpy tensorflow --upgrade</code>
+<code>python3 -m pip install kivy</code>
 
 
 <h1>Simulation</h1>
