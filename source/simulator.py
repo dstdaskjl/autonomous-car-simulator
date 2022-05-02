@@ -91,6 +91,11 @@ class Maze(GridLayout):
         return maze
 
     def generate_obstacles(self, obs_count=3, obs_size=(3, 3), maze_size=(21, 30)):
+        # If the size_hint of Arena is (0.8,0.8), the actual size is (1536, 864)
+        # The size_hint of Car is (0.1,0.045), which is (192, 48.6)
+        # The randomly generated obstacles should not locate on the car.
+        # So, the maze coords (12,9), (12,10), (12,11), (13,9), ..., (17,11) are not valid
+        car_pos_coords = {(i,j) for j in range(12, 18) for i in range(9, 12)}
         maze = [['p'] * maze_size[1] for _ in range(maze_size[0])]
         for _ in range(obs_count):
             while True:
@@ -98,9 +103,17 @@ class Maze(GridLayout):
                 col = random.randint(0, maze_size[1] - obs_size[1])
 
                 is_coord_valid = True
+
+                # Check duplicate obstacle positions
                 for i in range(obs_size[0]):
                     for j in range(obs_size[1]):
                         if maze[row + i][col + j] == 'x':
+                            is_coord_valid = False
+
+                # Check car position
+                for i in range(obs_size[0]):
+                    for j in range(obs_size[1]):
+                        if (row + i, col + j) in car_pos_coords:
                             is_coord_valid = False
 
                 if not is_coord_valid:
